@@ -1,52 +1,34 @@
-#####################################################################
-# CS:APP Malloc Lab
-# Handout files for students
-#
-# Copyright (c) 2002, R. Bryant and D. O'Hallaron, All rights reserved.
-# May not be used, modified, or copied without permission.
-#
-######################################################################
+## malloc lab(CMU 버전) 구현(C언어)
+### 세팅 방법
+```
+sudo apt update
+sudo apt install build-essential
+sudo apt install gdb
+sudo apt-get install gcc-multilib g++-multilib
 
-***********
-Main Files:
-***********
+git clone https://github.com/seanlion/malloc_lab_implementation.git
 
-mm.{c,h}	
-	Your solution malloc package. mm.c is the file that you
-	will be handing in, and is the only file you should modify.
+program 폴더에서 make clean
+make
+```
 
-mdriver.c	
-	The malloc driver that tests your mm.c file
+### 파일 설명
+```
+밖에 있는 c파일들은 동일한 내용을 다른 버전으로 구현한 것.
+program 폴더에 있는 mm.c 파일의 내용을 갈아끼워넣으면 됨.
 
-short{1,2}-bal.rep
-	Two tiny tracefiles to help you get started. 
+mm.c : 수정해야 할 유일한 파일(implicit list로first_fit으로 구현한 버전)(54점)
+mm_next_fit.c : implicit list 버전에서 next_fit으로 탐색한 버전(84점)
+mm_explicit.c : explicit list과 first fit으로 구현한 버전(87점)
 
-Makefile	
-	Builds the driver
+/traces : 테스트 꾸러미 폴더
+mdriver.c : 테스트 꾸러미 및 기타 라이브러리를 실행해서 코드를 채점하는 프로그램
+그 외 : mm.c 및 mdriver.c에 필요한 파일들. 만지지 말 것
+```
 
-**********************************
-Other support files for the driver
-**********************************
+### 실행하기
+```
+program/detail/mdriver : 채점하기
 
-config.h	Configures the malloc lab driver
-fsecs.{c,h}	Wrapper function for the different timer packages
-clock.{c,h}	Routines for accessing the Pentium and Alpha cycle counters
-fcyc.{c,h}	Timer functions based on cycle counters
-ftimer.{c,h}	Timer functions based on interval timers and gettimeofday()
-memlib.{c,h}	Models the heap and sbrk function
-
-*******************************
-Building and running the driver
-*******************************
-To build the driver, type "make" to the shell.
-
-To run the driver on a tiny test trace:
-
-	unix> mdriver -V -f short1-bal.rep
-
-The -V option prints out helpful tracing and summary information.
-
-To get a list of the driver flags:
-
-	unix> mdriver -h
-
+program/detail/mdriver -f traces/binary2-bal.rep : 특정 테스트 세트로 채점
+```
