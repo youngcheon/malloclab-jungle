@@ -1,4 +1,4 @@
-## malloc lab(CMU 버전) 구현(C언어)
+## malloclab-jungle
 ### 세팅 방법
 ```
 sudo apt update
