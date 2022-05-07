@@ -31,11 +31,11 @@ for trace in traceArr:
 data = subprocess.check_output("./mdriver")
 
 
-print("file              vaiid? score")
+print("file            vaiid? score")
 print("-----------------------------")
 scoreSum = 0 
 for result in resultArr:
-    print("{0}  {1} {2}".format(str(result[0]+' '*10)[:15], result[1], result[2]))
+    print("{0}  {1} {2}".format(str(result[0]+' '*15)[:18], result[1], result[2]))
     scoreSum += result[2]
 
 effectiveness = float(scoreSum) / float(100*len(traceArr)) * 100
