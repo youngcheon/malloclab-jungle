@@ -67,6 +67,7 @@ team_t team = {
 #define PREV_BLKP(bp) ((char*)(bp) - GET_SIZE(((char*)(bp) - DSIZE))) 
 // 그 전 블록의 bp위치로 이동.(이전 블록 footer로 이동하면 그 전 블록의 사이즈를 알 수 있으니 그만큼 그 전으로 이동.)
 static char *heap_listp;
+static char *last_bp;
 static void *extend_heap(size_t);
 static void *coalesce(void *);
 static void *find_fit(size_t);
@@ -93,6 +94,7 @@ int mm_init(void)
     //extend heap을 통해 한번 heap을 늘려줌.
     if (extend_heap(CHUNKSIZE / WSIZE) == NULL)
         return -1;
+    last_bp = (char *)heap_listp;
     return 0;
 }
 
@@ -148,6 +150,7 @@ void *mm_malloc(size_t size)
     if ((bp = find_fit(asize)) != NULL)
     {
         place(bp, asize);
+        last_bp = bp;
         return bp; //place마친 블록의 위치를 리턴
     }
 
@@ -157,6 +160,7 @@ void *mm_malloc(size_t size)
         return NULL;
     }
     place(bp, asize); //확장된 상태에서 asize를 넣어라.
+    last_bp = bp;
     return bp;
     //할당기가 요청한 크기를 조정하면 할당할 가용블록이 가용리스트에 있는지 탐색한다.(find_fit)
     //맞는 블록을 찾으면 요청한 블록을 배치한다 (place)
@@ -195,6 +199,7 @@ static void *coalesce(void *bp)
     /* CASE 1*/
     // 이전과 다음 블록이 모두 할당 되어있는 경우, 현재 블록의 상태는 할당->가용으로 변경
     if (prev_alloc && next_alloc){ 
+        last_bp = bp;
         return bp; //이미 free에서 가용이 되어있으니 여기선 따로 free할 필요없다.
     }
     /* CASE 2*/
@@ -237,6 +242,7 @@ static void *coalesce(void *bp)
     // 적용된bp리턴
     // bp는 항상 블록의 헤더 뒤에 위치하는게 좋기 때문에 연결이 끝나면 bp는 블록의 헤더에
     // 위치해야한다.
+    last_bp = bp;
     return bp;
 }
 
@@ -272,25 +278,44 @@ void *mm_realloc(void *ptr, size_t size)
 //next-fit => 검색을 리스트의 처음에서 시작하는 대신, 이전 검색이 종료된 지점에서 검색시작
 //best-fit => 모든 가용블록을 검사해서 크기가 맞는 가장 작은 블록을 선택
 
-//first-fit으로 구현함
+
 static void *find_fit(size_t asize)
-{
-    void *bp;
-    // 위치를 처음세팅했던 위치 (heap_listp)로 잡으면 
-    // 처음부터 모든 블록을 다 탐색 가능
-    // NEXT_BLKP로 다음 블록 이동
-    for (bp = heap_listp; GET_SIZE(HDRP(bp)) > 0; bp = NEXT_BLKP(bp))
-    {
-        //for 문을 돌면서 넣을 수 있는 블록을 찾는다.
-        //asize가 GET_SIZE이하면 넣을 수 있기 때문에
-        if (!GET_ALLOC(HDRP(bp)) && (asize <= GET_SIZE(HDRP(bp))))
-        {
-            // If a fit is found, return the address the of block pointer
+{   
+    // //first-fit으로 구현함
+    // void *bp;
+    // // 위치를 처음세팅했던 위치 (heap_listp)로 잡으면 
+    // // 처음부터 모든 블록을 다 탐색 가능
+    // // NEXT_BLKP로 다음 블록 이동
+    // for (bp = heap_listp; GET_SIZE(HDRP(bp)) > 0; bp = NEXT_BLKP(bp))
+    // {
+    //     //for 문을 돌면서 넣을 수 있는 블록을 찾는다.
+    //     //asize가 GET_SIZE이하면 넣을 수 있기 때문에
+    //     if (!GET_ALLOC(HDRP(bp)) && (asize <= GET_SIZE(HDRP(bp))))
+    //     {
+    //         // If a fit is found, return the address the of block pointer
+    //         return bp;
+    //     }
+    // }
+
+    // return NULL; /* No fit 상태*/
+
+    //next-fit
+    char *bp = last_bp;
+    for (bp = NEXT_BLKP(bp); GET_SIZE(HDRP(bp))!=0; bp=NEXT_BLKP(bp)){
+        if(!GET_ALLOC(HDRP(bp)) && GET_SIZE(HDRP(bp))>=asize){
+            last_bp = bp;
             return bp;
         }
     }
-
-    return NULL; /* No fit 상태*/
+    bp = heap_listp;
+    while (bp < last_bp){
+        bp = NEXT_BLKP(bp);
+        if (!GET_ALLOC(HDRP(bp)) && GET_SIZE(HDRP(bp))>= asize){
+            last_bp = bp;
+            return bp;
+        }
+    }
+    return NULL;
 }
 
 //place
