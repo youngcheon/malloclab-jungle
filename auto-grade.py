@@ -29,16 +29,18 @@ for trace in traceArr:
     resultArr.append( (trace, bool(is_correct), score) )
     i += 1
 data = subprocess.check_output("./mdriver")
-
-
-print("file            vaiid? score")
-print("-----------------------------")
+   
+print()
+print("File                VALID SCORE")
+print("--------------------------------")
 scoreSum = 0 
 for result in resultArr:
-    print("{0}  {1} {2}".format(str(result[0]+' '*15)[:18], result[1], result[2]))
+    print("{0}  {1} {2}".format(str(result[0]+' '*15)[:18], str(str(result[1])+' '*5)[:6], result[2]))
     scoreSum += result[2]
 
 effectiveness = float(scoreSum) / float(100*len(traceArr)) * 100
-print("------------------------------")
-print("percentage: " + str(effectiveness) + " %")
-print("mdriver 채점 결과 : ",data.split()[-1].decode())
+print("--------------------------------")
+print("average : " + str(effectiveness) + " %")
+print("--------------------------------")
+print("mdriver result : ",data.split()[-1].decode())
+print()
